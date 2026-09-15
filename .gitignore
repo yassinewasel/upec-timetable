@@ -1,0 +1,38 @@
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*secret*
+*.key
+*.pem
+
+# Runtime files
+*.log
+*.lock
+*.pid
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Backups / temporary files
+*.bak
+*.backup
+*.old
+*.tmp
+*before-*
+index.backup-*.html
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local screenshots and test output
+screenshots-temp/
