@@ -1,308 +1,6 @@
-/* =========================================================
-   1) CATALOGUE CENTRAL
-   ---------------------------------------------------------
-   Pour ajouter une matière/prof/salle récurrente, on la
-   définit UNE seule fois ici. Les semaines restent compactes.
-========================================================= */
-
-const CATALOG = {
-  subjects: {
-    DEV:      {label:"SAE3.A.01 DEV", color:"sae"},
-    DATA:     {label:"SAE3.C.01 DATA", color:"sae"},
-    WEB:      {label:"R3.01 Web", color:"web"},
-    DEVEFF:   {label:"R3.02 DévEff", color:"deveff"},
-    ANALYSE:  {label:"R3.03 Analyse", color:"analyse"},
-    QDEV:     {label:"R3.04 QDév", color:"qdev"},
-    PROGSYS:  {label:"R3.05 ProgSys", color:"progsys"},
-    CRYPTO:   {label:"R3.09 Crypto", color:"crypto"},
-    SYSINFO:  {label:"R3.10 SysInfo", color:"sysinfo"},
-    DROIT:    {label:"R3.11 Droit", color:"droit"},
-    ANGLAIS:  {label:"R3.12 Anglais", color:"anglais"},
-    COMM:     {label:"R3.13 Comm", color:"comm"},
-    PPP:      {label:"R3.14 PPP", color:"ppp"}
-  },
-
-  teachers: {
-    AUT_A:"Autonomie FI2A",
-    AUT_C:"Autonomie FI2C",
-    DELECHELLE:"DELECHELLE",
-    BELAICHE:"BELAICHE",
-    GIZZINI:"GIZZINI",
-    CHIBANI:"CHIBANI",
-    CASTRO:"CASTRO",
-    ALCOLEI:"ALCOLEI",
-    CARTIER:"CARTIER",
-    MASSERON:"MASSERON",
-    BRIQUET:"BRIQUET",
-    LEMEUNIER:"LEMEUNIER",
-    LORAUD:"LORAUD",
-    BOUAOUNE:"BOUAOUNE",
-    ATTAL:"ATTAL",
-    BEGUE:"BEGUE"
-  },
-
-  rooms: {
-    A:"INFO-019",
-    C:"INFO-112",
-    BOTH:"INFO-019 / INFO-112",
-    AMP_CHIMIE:"AMPHI CHIMIE",
-    RT_AMPHI:"RT-AMPHI",
-    RT115:"RT-115"
-  }
-};
-
-/* =========================================================
-   2) PRESETS
-   ---------------------------------------------------------
-   Une ligne de cours devient très courte :
-   c(0,"A_DEV","09:45","12:45")
-
-   Si un détail change :
-   c(0,"A_DEV","14:00","17:00",{room:"A"})
-========================================================= */
-
-const PRESETS = {
-  A_DEV:   p("A","DEV","BOTH","AUT_A","Proj"),
-  C_DATA:  p("C","DATA","BOTH","AUT_C","Proj"),
-
-  A_WEB:   p("A","WEB","A","DELECHELLE","TD"),
-  C_WEB:   p("C","WEB","C","BEGUE","TD"),
-  CM_WEB:  p("shared","WEB","AMP_CHIMIE","DELECHELLE","CM"),
-
-  A_DEVEFF:p("A","DEVEFF","A","BELAICHE","TD"),
-  C_DEVEFF:p("C","DEVEFF","C","ALCOLEI","TD"),
-  CM_DEVEFF:p("shared","DEVEFF","AMP_CHIMIE","BELAICHE","CM"),
-
-  A_ANALYSE:p("A","ANALYSE","A","BELAICHE","TD"),
-  C_ANALYSE:p("C","ANALYSE","C","GIZZINI","TP"),
-
-  A_QDEV:  p("A","QDEV","A","BELAICHE","TD"),
-  C_QDEV:  p("C","QDEV","C","CASTRO","TD"),
-  CM_QDEV: p("shared","QDEV","AMP_CHIMIE","BELAICHE","CM"),
-
-  A_PROGSYS:p("A","PROGSYS","A","CHIBANI","TD"),
-  C_PROGSYS:p("C","PROGSYS","C","GIZZINI","TD"),
-  CM_PROGSYS:p("shared","PROGSYS","RT_AMPHI","CHIBANI","CM"),
-
-  A_CRYPTO:p("A","CRYPTO","A","MASSERON","TD"),
-  C_CRYPTO:p("C","CRYPTO","C","CARTIER","TD"),
-  CM_CRYPTO:p("shared","CRYPTO","RT_AMPHI","CARTIER","CM"),
-
-  A_SYSINFO:p("A","SYSINFO","A","CHIBANI","TD"),
-  C_SYSINFO:p("C","SYSINFO","C","ATTAL","TD"),
-  CM_SYSINFO:p("shared","SYSINFO","RT_AMPHI","CHIBANI","CM"),
-
-  CM_DROIT:p("shared","DROIT","RT_AMPHI","BRIQUET","CM"),
-
-  A_ANGLAIS:p("A","ANGLAIS","RT115","LEMEUNIER","TP"),
-  C_ANGLAIS:p("C","ANGLAIS","RT115","LEMEUNIER","TP"),
-
-  A_COMM:p("A","COMM","A","LORAUD","TP"),
-  C_COMM:p("C","COMM","C","LORAUD","TP"),
-
-  A_PPP:p("A","PPP","A","BOUAOUNE","TD"),
-  C_PPP:p("C","PPP","C","BOUAOUNE","TD")
-};
-
-function p(group,subject,room,teacher,type){
-  return {group,subject,room,teacher,type};
-}
-
-/* =========================================================
-   3) DONNÉES DES SEMAINES
-   ---------------------------------------------------------
-   C'EST LA SEULE ZONE À MODIFIER POUR UNE NOUVELLE SEMAINE.
-
-   Exemple nouvelle semaine :
-   42: {
-     range:"12 → 16 octobre",
-     days:[["Lundi","12/10"], ...],
-     events:[
-       c(0,"A_DEV","09:45","12:45"),
-       c(0,"C_DATA","09:45","12:45"),
-       c(1,"A_WEB","14:00","17:00")
-     ]
-   }
-
-   Jour : 0=lundi, 1=mardi, 2=mercredi, 3=jeudi, 4=vendredi
-========================================================= */
-
-const FALLBACK_WEEKS = {
-  38:{
-    range:"14 → 18 septembre",
-    days:[["Lundi","14/09"],["Mardi","15/09"],["Mercredi","16/09"],["Jeudi","17/09"],["Vendredi","18/09"]],
-    events:[
-      c(0,"A_DEV","09:45","12:45"),
-      c(0,"C_DATA","09:45","12:45"),
-      c(0,"CM_WEB","14:00","15:30"),
-      c(0,"CM_QDEV","15:45","17:15"),
-      c(0,"CM_DEVEFF","17:30","19:00"),
-
-      c(1,"CM_PROGSYS","09:30","11:00"),
-      c(1,"A_WEB","11:15","12:45"),
-      c(1,"C_ANALYSE","11:15","12:45"),
-      c(1,"A_WEB","14:00","17:00"),
-      c(1,"C_PROGSYS","14:00","15:30"),
-      c(1,"C_QDEV","15:45","18:45"),
-
-      c(2,"A_QDEV","09:30","11:00"),
-      c(2,"C_WEB","09:45","12:45"),
-      c(2,"A_COMM","11:15","11:55"),
-      c(2,"A_ANGLAIS","12:00","12:45"),
-      c(2,"A_CRYPTO","14:00","17:00"),
-      c(2,"A_DEVEFF","17:15","18:45"),
-      c(2,"C_ANGLAIS","14:00","14:40"),
-      c(2,"C_COMM","14:45","15:30"),
-      c(2,"C_DATA","15:45","17:15"),
-
-      c(3,"A_PROGSYS","09:30","11:00"),
-      c(3,"C_DEVEFF","09:30","11:00"),
-      c(3,"A_ANALYSE","11:15","12:45"),
-      c(3,"C_COMM","11:15","11:55"),
-      c(3,"C_ANGLAIS","12:00","12:45"),
-      c(3,"A_QDEV","14:00","15:30"),
-      c(3,"C_ANALYSE","14:00","17:00"),
-      c(3,"A_ANALYSE","15:45","18:45"),
-
-      c(4,"CM_CRYPTO","08:00","09:30"),
-      c(4,"A_ANGLAIS","09:45","10:25"),
-      c(4,"A_COMM","10:30","11:10"),
-      c(4,"C_CRYPTO","09:45","11:10"),
-      c(4,"CM_DROIT","11:15","12:45"),
-      c(4,"A_DEV","14:00","17:00"),
-      c(4,"C_WEB","14:00","15:30"),
-      c(4,"C_CRYPTO","15:45","17:15")
-    ]
-  },
-
-  39:{
-    range:"21 → 25 septembre",
-    days:[["Lundi","21/09"],["Mardi","22/09"],["Mercredi","23/09"],["Jeudi","24/09"],["Vendredi","25/09"]],
-    events:[
-      c(0,"A_DEV","09:45","12:45"),
-      c(0,"C_DATA","09:45","12:45"),
-      c(0,"A_DEV","14:00","17:00",{room:"A"}),
-      c(0,"C_DATA","14:00","17:00"),
-
-      c(1,"A_DEV","09:45","12:45"),
-      c(1,"C_DATA","09:45","12:45"),
-      c(1,"A_DEV","14:00","17:00"),
-      c(1,"C_DATA","14:00","17:00"),
-
-      c(2,"A_DEV","09:45","12:45"),
-      c(2,"C_DATA","09:45","12:45"),
-      c(2,"A_DEV","14:00","15:30",{room:"A"}),
-      c(2,"A_PPP","15:45","17:15"),
-      c(2,"C_PPP","14:00","15:30"),
-      c(2,"C_ANGLAIS","15:45","17:15",{room:"C",type:"TD"}),
-
-      c(3,"A_COMM","09:30","11:00"),
-      c(3,"A_ANGLAIS","11:15","12:45",{room:"A"}),
-      c(3,"C_DATA","09:30","11:00",{room:"A"}),
-      c(3,"C_COMM","11:15","12:45"),
-      c(3,"A_DEV","14:00","17:00"),
-      c(3,"C_DATA","14:00","17:00"),
-
-      c(4,"A_DEV","09:00","12:00"),
-      c(4,"C_DATA","09:00","12:00"),
-      c(4,"A_DEV","14:00","17:00"),
-      c(4,"C_DATA","14:00","17:00")
-    ]
-  },
-
-  40:{
-    range:"28 septembre → 2 octobre",
-    days:[["Lundi","28/09"],["Mardi","29/09"],["Mercredi","30/09"],["Jeudi","01/10"],["Vendredi","02/10"]],
-    events:[
-      c(0,"A_DEVEFF","09:30","11:00"),
-      c(0,"A_ANALYSE","11:15","12:45"),
-      c(0,"C_ANALYSE","09:30","11:00"),
-      c(0,"C_PROGSYS","11:15","12:45"),
-      c(0,"A_DEVEFF","14:00","17:00"),
-      c(0,"C_COMM","14:00","15:30",{slot:1}),
-      c(0,"C_ANGLAIS","14:00","15:30",{slot:2}),
-      c(0,"C_ANGLAIS","15:45","17:15",{slot:1}),
-      c(0,"C_COMM","15:45","17:15",{slot:2}),
-      c(0,"CM_QDEV","17:15","18:45"),
-
-      c(1,"CM_SYSINFO","09:30","11:00"),
-      c(1,"CM_CRYPTO","11:15","12:45"),
-      c(1,"A_DEV","14:00","15:30",{room:"A"}),
-      c(1,"A_PROGSYS","15:45","17:15"),
-      c(1,"C_ANALYSE","14:00","17:00"),
-
-      c(2,"A_DEV","09:45","12:45"),
-      c(2,"C_DATA","09:45","12:45"),
-      c(2,"A_WEB","14:00","17:00"),
-      c(2,"C_CRYPTO","14:00","17:00"),
-      c(2,"C_DEVEFF","17:15","18:45"),
-
-      c(3,"A_ANALYSE","09:45","12:45"),
-      c(3,"C_QDEV","09:45","12:45"),
-      c(3,"A_QDEV","14:00","15:30"),
-      c(3,"A_SYSINFO","15:45","17:15"),
-      c(3,"C_SYSINFO","14:00","15:30"),
-      c(3,"C_DATA","15:45","17:15",{room:"C"}),
-      c(3,"CM_DROIT","17:15","18:45"),
-
-      c(4,"A_ANGLAIS","08:45","10:15",{slot:1}),
-      c(4,"A_COMM","08:45","10:15",{slot:2}),
-      c(4,"A_COMM","10:30","12:00",{slot:1}),
-      c(4,"A_ANGLAIS","10:30","12:00",{slot:2}),
-      c(4,"C_WEB","09:00","12:00"),
-      c(4,"A_CRYPTO","14:00","17:00"),
-      c(4,"C_DEVEFF","14:00","17:00")
-    ]
-  },
-
-  41:{
-    range:"5 → 9 octobre",
-    days:[["Lundi","05/10"],["Mardi","06/10"],["Mercredi","07/10"],["Jeudi","08/10"],["Vendredi","09/10"]],
-    events:[
-      c(0,"A_COMM","11:15","12:45"),
-      c(0,"C_DATA","11:15","12:45",{room:"C"}),
-      c(0,"A_ANGLAIS","14:00","15:30",{room:"A",type:"TD"}),
-      c(0,"C_COMM","14:00","15:30"),
-      c(0,"A_DEV","15:45","17:15"),
-      c(0,"C_DATA","15:45","17:15",{teacher:"BEGUE"}),
-
-      c(1,"A_PPP","11:15","12:45"),
-      c(1,"C_DATA","11:15","12:45",{room:"C"}),
-      c(1,"A_DEV","14:00","17:00",{room:"A"}),
-      c(1,"C_DATA","14:00","17:00",{room:"C"}),
-
-      c(2,"A_DEV","11:15","12:45",{room:"A"}),
-      c(2,"C_DATA","11:15","12:45",{room:"C"}),
-      c(2,"A_DEV","14:00","17:00",{room:"A"}),
-      c(2,"C_DATA","14:00","17:00"),
-
-      c(3,"A_DEV","09:45","12:45"),
-      c(3,"C_PPP","09:30","11:00"),
-      c(3,"C_DATA","11:15","12:45"),
-      c(3,"A_DEV","14:00","15:30",{room:"A",teacher:"BEGUE"}),
-      c(3,"C_DATA","14:00","15:30",{room:"C"}),
-
-      c(4,"A_DEV","09:00","12:00"),
-      c(4,"C_DATA","09:00","12:00"),
-      c(4,"A_DEV","14:00","15:30",{room:"A"}),
-      c(4,"C_ANGLAIS","14:00","15:30",{room:"C",type:"TD"})
-    ]
-  }
-};
-
-function c(day,preset,start,end,overrides={}){
-  return {day,start,end,preset,...overrides};
-}
-
-/* =========================================================
-   DONNÉES EXTERNES
-   ---------------------------------------------------------
-   Le site charge ./data/edt.json.
-   Les semaines intégrées ci-dessus restent uniquement comme
-   secours si le JSON est indisponible.
-========================================================= */
-
-let WEEKS=JSON.parse(JSON.stringify(FALLBACK_WEEKS));
+/* Les emplois du temps sont chargés depuis les fichiers JSON générés par les scripts de synchronisation. */
+let WEEKS={};
+let scheduleStatus="Chargement de l'emploi du temps…";
 
 function normalizeExternalRange(raw,weekNo){
   if(raw?.range) return raw.range;
@@ -364,14 +62,7 @@ async function loadExternalSchedule(formation=currentFormation){
       const payload=await response.json();
       const incoming=payload?.weeks||{};
 
-      /*
-       * FI2 garde ses données intégrées en secours.
-       * FA2 utilise uniquement fa2.json.
-       */
-      const nextWeeks=
-        requested==="FI2"
-          ? JSON.parse(JSON.stringify(FALLBACK_WEEKS))
-          : {};
+      const nextWeeks={};
 
       Object.entries(incoming).forEach(([weekNo,rawWeek])=>{
         const n=Number(weekNo);
@@ -398,6 +89,7 @@ async function loadExternalSchedule(formation=currentFormation){
       );
 
       WEEKS=nextWeeks;
+      scheduleStatus="";
 
       state.week=getAutoWeek();
       state.manualWeek=false;
@@ -434,13 +126,8 @@ async function loadExternalSchedule(formation=currentFormation){
         return loadExternalSchedule("FI2");
       }
 
-      /*
-       * Secours ultime FI2.
-       */
-      WEEKS=
-        JSON.parse(
-          JSON.stringify(FALLBACK_WEEKS)
-        );
+      WEEKS={};
+      scheduleStatus="Les données de l'emploi du temps sont temporairement indisponibles.";
 
       currentFormation="FI2";
       state.week=getAutoWeek();
@@ -590,6 +277,8 @@ function getWeekActivationDate(weekNo){
 function getAutoWeek(now=new Date()){
   const weekNumbers=Object.keys(WEEKS).map(Number).sort((a,b)=>a-b);
 
+  if(!weekNumbers.length) return null;
+
   let selected=weekNumbers[0];
 
   for(const weekNo of weekNumbers){
@@ -623,28 +312,28 @@ let state={
 state.day=Math.min(4,Math.max(0,state.day));
 
 function resolveEvent(raw){
-  const preset=PRESETS[raw.preset] || {};
-  const subjectKey=raw.subject || preset.subject;
-  const subject=CATALOG.subjects[subjectKey] || {
-    label:String(subjectKey||"Cours")
+  const subjectLabel=String(raw.subject||"Cours")
       .replace(/-/g," ")
       .replace(/\s+/g," ")
-      .trim(),
-    color:"sae"
-  };
-
-  const roomKey=raw.room || preset.room;
-  const teacherKey=raw.teacher || preset.teacher;
+      .trim();
 
   return {
-    ...preset,
     ...raw,
-    subjectLabel:subject.label,
-    color:raw.color || subject.color,
-    roomLabel:CATALOG.rooms[roomKey] || roomKey || "",
-    teacherLabel:CATALOG.teachers[teacherKey] || teacherKey || "",
-    type:raw.type || preset.type || ""
+    subjectLabel,
+    color:raw.color || "sae",
+    roomLabel:String(raw.room || ""),
+    teacherLabel:String(raw.teacher || ""),
+    type:String(raw.type || "")
   };
+}
+
+function escapeHtml(value){
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/\"/g,"&quot;")
+    .replace(/'/g,"&#039;");
 }
 
 function timeToDecimal(t){
@@ -658,6 +347,26 @@ function pos(decimal){
 
 function renderAll(){
   renderWeekButtons();
+
+  const exportButton=document.getElementById("saveImageBtn");
+  const hasSchedule=Boolean(state.week && WEEKS[state.week]);
+
+  if(exportButton){
+    exportButton.disabled=!hasSchedule;
+  }
+
+  if(!hasSchedule){
+    const subtitle=document.getElementById("subtitle");
+    const nav=document.getElementById("dayNav");
+    const schedule=document.getElementById("schedule");
+
+    subtitle.textContent=scheduleStatus;
+    nav.innerHTML="";
+    schedule.innerHTML='<div class="schedule-empty" role="status"></div>';
+    schedule.querySelector(".schedule-empty").textContent=scheduleStatus;
+    return;
+  }
+
   renderDayNav();
   renderMain();
   persist();
@@ -812,11 +521,11 @@ function renderSchedule(root,week,visibleDays){
     h.className="day-header";
     h.style.gridColumn=visualIndex+2;
     h.innerHTML=`
-      <div class="day">${d[0]}</div>
-      <div class="date">${d[1]}</div>
+      <div class="day">${escapeHtml(d[0])}</div>
+      <div class="date">${escapeHtml(d[1])}</div>
       <div class="group-labels ${FORMATION_CONFIG.groups.length===3?"fa2":""}">
           ${FORMATION_CONFIG.labels
-            .map(label=>`<span>${label}</span>`)
+            .map(label=>`<span>${escapeHtml(label)}</span>`)
             .join("")}
         </div>
     `;
@@ -941,10 +650,10 @@ function renderSchedule(root,week,visibleDays){
     if(duration<=.8) el.classList.add("small");
 
     el.innerHTML=`
-      <div class="event-time">${ev.start}–${ev.end}</div>
-      <div class="event-title">${ev.subjectLabel}</div>
-      <div class="event-room">${ev.roomLabel}${ev.type?" · "+ev.type:""}</div>
-      <div class="event-teacher">${ev.teacherLabel}</div>
+      <div class="event-time">${escapeHtml(ev.start)} - ${escapeHtml(ev.end)}</div>
+      <div class="event-title">${escapeHtml(ev.subjectLabel)}</div>
+      <div class="event-room">${escapeHtml(ev.roomLabel)}${ev.type?" · "+escapeHtml(ev.type):""}</div>
+      <div class="event-teacher">${escapeHtml(ev.teacherLabel)}</div>
     `;
 
     area.appendChild(el);
@@ -958,6 +667,9 @@ function renderSchedule(root,week,visibleDays){
 
 async function saveScheduleAsImage(){
   const btn=document.getElementById("saveImageBtn");
+
+  if(!state.week || !WEEKS[state.week]) return;
+
   const old=btn.textContent;
 
   btn.disabled=true;
@@ -1012,7 +724,7 @@ async function saveScheduleAsImage(){
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png",1));
     if(!blob) throw new Error("Impossible de produire le PNG");
 
-    const filename=`EDT_FI2A_FI2C_S${state.week}.png`;
+    const filename=`EDT_${FORMATIONS[currentFormation].subtitle.replaceAll("/","-")}_S${state.week}.png`;
     const isMobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
     // PC : vraie fenêtre "Enregistrer sous" quand possible

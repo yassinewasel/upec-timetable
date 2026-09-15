@@ -36,3 +36,4 @@ Thumbs.db
 
 # Local screenshots and test output
 screenshots-temp/
+.playwright-cli/
