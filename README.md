@@ -116,15 +116,7 @@ pip install -r sync/requirements.txt
 
 Les commandes ci-dessus actualisent `public_html/data/edt.json` et `public_html/data/fa2.json` avec les semaines disponibles.
 
-## Données et sécurité
-
-Les données affichées proviennent de Formadep360. Aucun identifiant personnel, mot de passe ou secret de production n'est conservé dans le dépôt.
-
-Le déclencheur de synchronisation HTTP prévu pour un hébergement lit son secret depuis un fichier local ignoré par Git. Les détails techniques sont documentés dans [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
-
-## Auteur
-
-Yassine Wasel, étudiant en BUT Informatique à l'UPEC.
+Les données affichées proviennent de Formadep360. Le dépôt ne contient aucun identifiant personnel, mot de passe ou secret de production.
 
 ## Licence
 
